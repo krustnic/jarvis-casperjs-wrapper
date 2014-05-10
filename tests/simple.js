@@ -6,7 +6,7 @@
 * To change this template use Tools | Templates.
 */
 
-var fs    = require("fs");
+//var fs    = require("fs");
 var utils = require("utils");
 
 casper.test.begin('Google search retrieves 10 or more results', 5, function suite(test) {
