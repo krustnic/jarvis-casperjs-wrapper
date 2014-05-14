@@ -6,6 +6,8 @@
 * To change this template use Tools | Templates.
 */
 
+console.log("included");
+
 /**
  * NOTE! It is not a NodeJS environment - its PhantomJS
  * So it's a Phantom's modules like "fs"
@@ -79,10 +81,6 @@ var Jarvis = new (function() {
     
 })();
 
-// For unit tests purpose
-if ( typeof exports != "undefined" ) exports.Jarvis = Jarvis;
-//
-
 /**
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
  * Rewrite "capture" for making screenshots to the proper server location
@@ -110,7 +108,7 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     }
     
     
-    f.call( casper, Jarvis.getNewScreenshotName() );    
+    f.call( casper, Jarvis.getNewScreenshotName() );     
     
 });
 

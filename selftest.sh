@@ -1,0 +1,1 @@
+export PATH=$PATH:/home/codio/.nvm/v0.10.25/lib/node_modules/casperjs/node_modules/phantomjs/bin &&  casperjs test --base-dir=./unit-tests-tmp --config-file=../jarvis-config.json --includes=pre-tests.js,jarvis.js ./unit-tests/
