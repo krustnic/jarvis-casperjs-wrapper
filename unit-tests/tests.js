@@ -17,3 +17,4 @@ exports["getNewScreenshotName"] = function(test){
     test.equal( Jarvis.getNewScreenshotName(), "screen-2.png");
     test.done();
 };
+
