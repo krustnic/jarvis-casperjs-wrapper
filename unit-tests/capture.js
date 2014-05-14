@@ -16,10 +16,10 @@ casper.test.begin('Capture screenshot', 5, function suite(test) {
         test.assert( testfs.exists( "./unit-tests-tmp/screen-2.png" ), "capture 1 param" );
         
         this.capture('google.png', {
-            top: 100,
-            left: 100,
-            width: 500,
-            height: 400
+            top: 0,
+            left: 0,
+            width: 4000,
+            height: 4000
         });
         
         test.assert( testfs.exists( "./unit-tests-tmp/screen-3.png" ), "capture 2 param" );

@@ -102,29 +102,31 @@ var Jarvis = new (function() {
  * Rewrite "capture" for making screenshots to the proper server location
  **/
 
-casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
+casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {    
     
-    // Only fileName
-    if ( arguments.length == 1 ) {
-        f.call( casper, Jarvis.getNewScreenshotPath() );            
-        return;
+    // Default params
+    var captureParams = {
+        top   : 0,
+        left  : 0,
+        width : Jarvis.getScreenResolution().width,
+        height: Jarvis.getScreenResolution().height
+    };
+    
+    // Merge default params with user-defined, if it exist
+    if ( typeof arguments[1] == "object" ) {
+        for( var key in arguments[1] ) {
+            if ( key == "width" && arguments[1][key]  > Jarvis.getScreenResolution().width  ) continue;
+            if ( key == "height" && arguments[1][key] > Jarvis.getScreenResolution().height ) continue;
+            captureParams[key] = arguments[1][key];
+        }
     }
     
-    // Filename and clipRect
-    if ( arguments.length == 2 ) {
-        f.call( casper, Jarvis.getNewScreenshotPath(), arguments[1] );            
-        return;
-    }
+    // We create screenshot with max demension 4000;
+    if ( captureParams["width"]  > 4000 ) captureParams["width"]  = 4000;
+    if ( captureParams["height"] > 4000 ) captureParams["height"] = 4000;
     
-    // Filename, clipRect and imgOptions
-    // Ignoring third imgOptions - always create PNG image
-    if ( arguments.length == 3 ) {
-        f.call( casper, Jarvis.getNewScreenshotPath(), arguments[1] );            
-        return;
-    }
-    
-    
-    f.call( casper, Jarvis.getNewScreenshotName() );     
+
+    f.call( casper, Jarvis.getNewScreenshotPath(), captureParams );             
     
 });
 
