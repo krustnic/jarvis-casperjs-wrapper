@@ -6,8 +6,6 @@
 * To change this template use Tools | Templates.
 */
 
-console.log("included");
-
 /**
  * NOTE! It is not a NodeJS environment - its PhantomJS
  * So it's a Phantom's modules like "fs"
@@ -59,6 +57,24 @@ var Jarvis = new (function() {
     
     this.getNewScreenshotPath = function() {
         return self.BASE_DIR + "/" + self.getNewScreenshotName();
+    }
+    
+    this.getScreenResolution = function() {
+        return casper.evaluate(function() {
+            var D = document;
+            return screenResolution = {
+                height: Math.max(
+                    D.body.scrollHeight, D.documentElement.scrollHeight,
+                    D.body.offsetHeight, D.documentElement.offsetHeight,
+                    D.body.clientHeight, D.documentElement.clientHeight
+                ),
+                width: Math.max(
+                    D.body.scrollWidth, D.documentElement.scrollWidth,
+                    D.body.offsetWidth, D.documentElement.offsetWidth,
+                    D.body.clientWidth, D.documentElement.clientWidth
+                )
+            };
+        });
     }
     
     this.wrap = function( target, wrapFunction ) {
