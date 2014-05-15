@@ -122,7 +122,7 @@ var Jarvis = new (function() {
  * Rewrite "capture" for making screenshots to the proper server location
  **/
 
-casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {    
+casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {    
     
     // Default params
     var captureParams = {
@@ -133,9 +133,9 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     };
     
     // Merge default params with user-defined, if it exist
-    if ( typeof arguments[1] == "object" ) {
-        for( var key in arguments[1] ) {
-            captureParams[key] = arguments[1][key];
+    if ( typeof args[1] == "object" ) {
+        for( var key in args[1] ) {
+            captureParams[key] = args[1][key];
         }
     }
     
@@ -145,7 +145,7 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     
     var screenshotName = Jarvis.getNewScreenshotName();
     var screenshotPath = Jarvis.getPath( screenshotName );
-    f.call( casper, screenshotPath, captureParams );         
+    var r = f.call( casper, screenshotPath, captureParams );         
     
     // Check is screenshot really created
     var isExist = Jarvis.exists( screenshotPath );
@@ -158,26 +158,31 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     } );
     
     Jarvis.saveLogs();
+    
+    return r;
         
 });
 
-
+casper.test.assertEval = Jarvis.wrap( casper.test.assertEval, function( f, args ) {  
+    console.log("Assert evel wrapped!");
+    return f.apply( casper.test, args );  
+} );
 
 /**
  * Disallow user script access to some modules (e.g. "fs")  
  **/
 
-require = Jarvis.wrap( require, function( f, arguments ) {
+require = Jarvis.wrap( require, function( f, args ) {
     
     var disallow = {
         "fs" : ""
     }
     
-    if ( arguments[0] in disallow ) {
+    if ( args[0] in disallow ) {
         console.log("Sorry. You have no access to Filesystem.");
         //casper.exit();
         return null;
     }
     
-    return f.apply( this, arguments );
+    return f.apply( this, args );
 }); 
