@@ -14,9 +14,13 @@
 
 var Jarvis = new (function() {
     var self = this;
+    var fs   = require("fs");
+    
+    this.screenshotsLog = [];
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
     this.USER_CONFIG_FILE = casper.cli.raw.get("config-file");
+    this.RESULT_LOG_FILE  = "result.json";
     
     this.SCREENSHOT_PREFIX = "screen";
     this.SCREENSHOT_EXT    = "png";
@@ -55,6 +59,10 @@ var Jarvis = new (function() {
         return newName;
     }
     
+    this.getPath = function( localName ) {
+        return self.BASE_DIR + "/" + localName;
+    }
+    
     this.getNewScreenshotPath = function() {
         return self.BASE_DIR + "/" + self.getNewScreenshotName();
     }
@@ -77,10 +85,22 @@ var Jarvis = new (function() {
         });
     }
     
+    this.saveLogs = function() {
+        var log = self.config;
+        log["screenShots"] = self.screenshotsLog;
+        
+        fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
+    }
+    
+    // Wrapper for "fs" isExists
+    this.exists = function( filePath ) {
+        return fs.exists( filePath );
+    }
+    
     this.wrap = function( target, wrapFunction ) {
         var f = target;
         return function() {
-            wrapFunction( f, arguments );            
+            return wrapFunction( f, arguments );            
         };
     }
     
@@ -115,8 +135,6 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     // Merge default params with user-defined, if it exist
     if ( typeof arguments[1] == "object" ) {
         for( var key in arguments[1] ) {
-            if ( key == "width" && arguments[1][key]  > Jarvis.getScreenResolution().width  ) continue;
-            if ( key == "height" && arguments[1][key] > Jarvis.getScreenResolution().height ) continue;
             captureParams[key] = arguments[1][key];
         }
     }
@@ -125,10 +143,25 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, arguments ) {
     if ( captureParams["width"]  > 4000 ) captureParams["width"]  = 4000;
     if ( captureParams["height"] > 4000 ) captureParams["height"] = 4000;
     
-
-    f.call( casper, Jarvis.getNewScreenshotPath(), captureParams );             
+    var screenshotName = Jarvis.getNewScreenshotName();
+    var screenshotPath = Jarvis.getPath( screenshotName );
+    f.call( casper, screenshotPath, captureParams );         
     
+    // Check is screenshot really created
+    var isExist = Jarvis.exists( screenshotPath );
+    var pageUrl = casper.getCurrentUrl();
+    
+    Jarvis.screenshotsLog.push( {
+        success    : isExist,
+        page       : pageUrl,
+        screenName : screenshotName
+    } );
+    
+    Jarvis.saveLogs();
+        
 });
+
+
 
 /**
  * Disallow user script access to some modules (e.g. "fs")  
@@ -142,9 +175,9 @@ require = Jarvis.wrap( require, function( f, arguments ) {
     
     if ( arguments[0] in disallow ) {
         console.log("Sorry. You have no access to Filesystem.");
-        casper.exit();
-        return;
+        //casper.exit();
+        return null;
     }
     
-    f.apply( this, arguments );
+    return f.apply( this, arguments );
 }); 
