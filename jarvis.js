@@ -19,6 +19,7 @@ var Jarvis = new (function() {
     // Log's parts
     this.screenshotsLog  = [];
     this.suiteResultsLog = [];
+    this.casperLog       = [];
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
     this.USER_CONFIG_FILE = casper.cli.raw.get("config-file");
@@ -92,6 +93,7 @@ var Jarvis = new (function() {
         var log = self.config;
         log["screenShots"]  = self.screenshotsLog;
         log["suiteResults"] = self.suiteResultsLog;
+        log["casperLog"]    = self.casperLog;
         
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -172,6 +174,7 @@ casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {
     
     Jarvis.suiteResultsLog         = casper.test.suiteResults;
     Jarvis.suiteResultsLog["time"] = casper.test.suiteResults.calculateDuration();
+    Jarvis.casperLog               = casper.result.log;
     
     Jarvis.saveLogs();
 } );
