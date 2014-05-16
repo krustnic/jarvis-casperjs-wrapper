@@ -16,16 +16,19 @@ var Jarvis = new (function() {
     var self = this;
     var fs   = require("fs");
     
-    this.screenshotsLog = [];
+    // Log's parts
+    this.screenshotsLog  = [];
+    this.suiteResultsLog = [];
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
     this.USER_CONFIG_FILE = casper.cli.raw.get("config-file");
     this.RESULT_LOG_FILE  = "result.json";
     
     this.SCREENSHOT_PREFIX = "screen";
-    this.SCREENSHOT_EXT    = "png";
-    this._screenShotCount  = 0;
+    this.SCREENSHOT_EXT    = "png";   
     
+    this._screenShotCount  = 0;
+        
     // Config default values
     // Actual values will be result of merge with file data
     this.config = {
@@ -87,7 +90,8 @@ var Jarvis = new (function() {
     
     this.saveLogs = function() {
         var log = self.config;
-        log["screenShots"] = self.screenshotsLog;
+        log["screenShots"]  = self.screenshotsLog;
+        log["suiteResults"] = self.suiteResultsLog;
         
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -162,6 +166,15 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     return r;
         
 });
+
+casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {      
+    var r = f.apply( casper.test, args );  
+    
+    Jarvis.suiteResultsLog         = casper.test.suiteResults;
+    Jarvis.suiteResultsLog["time"] = casper.test.suiteResults.calculateDuration();
+    
+    Jarvis.saveLogs();
+} );
 
 casper.test.assertEval = Jarvis.wrap( casper.test.assertEval, function( f, args ) {  
     console.log("Assert evel wrapped!");
