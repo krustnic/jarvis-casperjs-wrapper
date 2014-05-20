@@ -21,6 +21,7 @@ var Jarvis = new (function() {
     this.suiteResultsLog = [];
     this.casperLog       = [];
     
+    
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
     this.USER_CONFIG_FILE = casper.cli.raw.get("config-file");
     this.RESULT_LOG_FILE  = "result.json";
@@ -29,7 +30,8 @@ var Jarvis = new (function() {
     this.SCREENSHOT_EXT    = "png";   
     
     this._screenShotCount  = 0;
-        
+    this.currentCommandId  = 0;
+    
     // Config default values
     // Actual values will be result of merge with file data
     this.config = {
@@ -168,6 +170,44 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     return r;
         
 });
+
+
+
+
+/**
+ * Original signature:  processAssertionResult(Object result))
+ * Rewrite "processAssertionResult" for adding information into asserts and failures
+ **/
+casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionResult  , function( f, args ) {  
+    var err = args[0];
+    if(!err.url){
+        err.url = casper.getCurrentUrl();
+    }
+    err.commandId = Jarvis.currentCommandId;  
+    return f.apply( casper.test, args );  
+} );
+
+// on load.fail listener, add failed assertation when cant load resource
+casper.on('load.failed', function(msg) {
+    var messsge = 'Loading resource failed with status=' + msg.status;
+    casper.test.processAssertionResult(    
+        {
+        success: false,
+        type: "uncaughtError",
+        file: casper.test.currentTestFile,
+        message: messsge,
+        url:  msg.url, 
+        values: {
+            error: new CasperError( messsge),
+        }
+    });
+});
+
+// on step.start listener, increment commandId counter
+casper.on('step.start', function() {
+    Jarvis.currentCommandId = Jarvis.currentCommandId + 1;
+});
+
 
 casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {      
     var r = f.apply( casper.test, args );  
