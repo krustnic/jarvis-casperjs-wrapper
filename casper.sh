@@ -1,1 +1,1 @@
-export PATH=$PATH:/home/codio/.nvm/v0.10.25/lib/node_modules/casperjs/node_modules/phantomjs/bin &&  casperjs test --base-dir=. --includes=jarvis.js $1
+export PATH=$PATH:/home/codio/.nvm/v0.10.25/lib/node_modules/casperjs/node_modules/phantomjs/bin &&  casperjs test  --verbose --log-level=debug  --base-dir=. --includes=jarvis.js $1
