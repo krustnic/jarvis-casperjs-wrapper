@@ -30,7 +30,7 @@ var Jarvis = new (function() {
     this.SCREENSHOT_EXT    = "png";   
     
     this._screenShotCount  = 0;
-    this.currentCommandId  = 0;
+    this._currentCommandId  = 0;
     
     // Config default values
     // Actual values will be result of merge with file data
@@ -160,6 +160,7 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     var pageUrl = casper.getCurrentUrl();
     
     Jarvis.screenshotsLog.push( {
+        commandId  : Jarvis._currentCommandId,
         success    : isExist,
         page       : pageUrl,
         screenName : screenshotName
@@ -183,7 +184,7 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     if(!err.url){
         err.url = casper.getCurrentUrl();
     }
-    err.commandId = Jarvis.currentCommandId;  
+    err.commandId = Jarvis._currentCommandId;  
     return f.apply( casper.test, args );  
 } );
 
@@ -205,7 +206,7 @@ casper.on('load.failed', function(msg) {
 
 // on step.start listener, increment commandId counter
 casper.on('step.start', function() {
-    Jarvis.currentCommandId = Jarvis.currentCommandId + 1;
+    Jarvis._currentCommandId = Jarvis._currentCommandId + 1;
 });
 
 
