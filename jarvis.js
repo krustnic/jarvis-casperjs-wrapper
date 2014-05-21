@@ -163,7 +163,9 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
         commandId  : Jarvis._currentCommandId,
         success    : isExist,
         page       : pageUrl,
-        screenName : screenshotName
+        screenName : screenshotName,
+        width      : captureParams.width,
+        height     : captureParams.height
     } );
     
     Jarvis.saveLogs();
