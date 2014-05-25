@@ -20,6 +20,7 @@ var Jarvis = new (function() {
     this.screenshotsLog  = [];
     this.suiteResultsLog = [];
     this.casperLog       = [];
+    this.pageLog       = [];
     
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
@@ -96,6 +97,7 @@ var Jarvis = new (function() {
         log["screenShots"]  = self.screenshotsLog;
         log["suiteResults"] = self.suiteResultsLog;
         log["casperLog"]    = self.casperLog;
+        log["pageLog"]      = self.pageLog;
         
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -204,6 +206,16 @@ casper.on('load.failed', function(msg) {
             error: new CasperError( messsge),
         }
     });
+});
+
+//logging all JavaScript errors on page
+casper.on("page.error", function(msg, trace) {
+    Jarvis.pageLog.push( {
+        commandId   : Jarvis._currentCommandId,
+        page        : casper.getCurrentUrl(),
+        message     : msg,
+        trace       : trace
+    } );
 });
 
 // on step.start listener, increment commandId counter
