@@ -20,7 +20,9 @@ var Jarvis = new (function() {
     this.screenshotsLog  = [];
     this.suiteResultsLog = [];
     this.casperLog       = [];
-    this.pageLog       = [];
+    this.pageLog         = [];
+    this.httpStatusLog   = [];
+    
     
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
@@ -92,12 +94,30 @@ var Jarvis = new (function() {
         });
     }
     
+    //  add http status into log
+    this.addHttpStatusLog = function(resource){
+        self.httpStatusLog.push(
+            {
+                commandId   : Jarvis._currentCommandId,
+                status      : resource.status,
+                redirectURL : resource.redirectURL,
+                stage       : resource.end,
+                statusText  : resource.statusText,
+                time        : resource.time,
+                data        : resource.data,
+                page        : resource.url,
+                contentType : resource.contentType,
+                headers     : resource.headers
+            })
+    }
+    
     this.saveLogs = function() {
         var log = self.config;
-        log["screenShots"]  = self.screenshotsLog;
-        log["suiteResults"] = self.suiteResultsLog;
-        log["casperLog"]    = self.casperLog;
-        log["pageLog"]      = self.pageLog;
+        log["screenShots"]   = self.screenshotsLog;
+        log["suiteResults"]  = self.suiteResultsLog;
+        log["casperLog"]     = self.casperLog;
+        log["pageLog"]       = self.pageLog;
+        log["httpStatusLog"] = self.httpStatusLog;
         
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -217,6 +237,19 @@ casper.on("page.error", function(msg, trace) {
         trace       : trace
     } );
 });
+
+//logging 401 http status
+casper.on('http.status.401', function(resource) {
+    Jarvis.addHttpStatusLog(resource);
+})
+//logging 404 http status
+casper.on('http.status.404', function(resource) {
+    Jarvis.addHttpStatusLog(resource);
+})
+//logging 500 http status
+casper.on('http.status.500', function(resource) {
+    Jarvis.addHttpStatusLog(resource);
+})
 
 // on step.start listener, increment commandId counter
 casper.on('step.start', function() {
