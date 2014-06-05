@@ -267,11 +267,6 @@ casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {
     Jarvis.saveLogs();
 } );
 
-casper.test.assertEval = Jarvis.wrap( casper.test.assertEval, function( f, args ) {  
-    console.log("Assert evel wrapped!");
-    return f.apply( casper.test, args );  
-} );
-
 
 casper.download = Jarvis.wrap( casper.download, function( f, args ) {  
     casper.log("Sorry. You have no access to Download() function");
