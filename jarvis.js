@@ -272,6 +272,11 @@ casper.test.assertEval = Jarvis.wrap( casper.test.assertEval, function( f, args 
     return f.apply( casper.test, args );  
 } );
 
+
+casper.download = Jarvis.wrap( casper.download, function( f, args ) {  
+    casper.log("Sorry. You have no access to Download() function");
+    return null;  
+} );
 /**
  * Disallow user script access to some modules (e.g. "fs")  
  **/
@@ -283,7 +288,7 @@ require = Jarvis.wrap( require, function( f, args ) {
     }
     
     if ( args[0] in disallow ) {
-        console.log("Sorry. You have no access to Filesystem.");
+        casper.log("Sorry. You have no access to Filesystem.");
         //casper.exit();
         return null;
     }
