@@ -274,7 +274,7 @@ casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {
  **/
 casper.download = Jarvis.wrap( casper.download, function( f, args ) {  
     casper.log("Sorry. You have no access to Download() function");
-    return null;  
+    return this;  
 } );
 
 /**
