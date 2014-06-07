@@ -256,7 +256,9 @@ casper.on('step.start', function() {
     Jarvis._currentCommandId = Jarvis._currentCommandId + 1;
 });
 
-
+/**
+ * Saving jarjis Log into JSON file
+ **/
 casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {      
     var r = f.apply( casper.test, args );  
     
@@ -267,26 +269,33 @@ casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {
     Jarvis.saveLogs();
 } );
 
-casper.test.assertEval = Jarvis.wrap( casper.test.assertEval, function( f, args ) {  
-    console.log("Assert evel wrapped!");
-    return f.apply( casper.test, args );  
+/**
+ * Disallow user to use download() function  
+ **/
+casper.download = Jarvis.wrap( casper.download, function( f, args ) {  
+    casper.log("Sorry. You have no access to Download() function");
+    return this;  
 } );
 
 /**
  * Disallow user script access to some modules (e.g. "fs")  
  **/
 
-require = Jarvis.wrap( require, function( f, args ) {
-    
-    var disallow = {
-        "fs" : ""
-    }
-    
-    if ( args[0] in disallow ) {
-        console.log("Sorry. You have no access to Filesystem.");
-        //casper.exit();
-        return null;
-    }
-    
-    return f.apply( this, args );
-}); 
+
+(function() {
+    var _require = require;
+    require = Jarvis.wrap( require, function( f, args ) {
+        var disallow = {
+            "fs" : ""
+            }
+        if ( args[0] in disallow ) {
+            casper.log("Sorry. You have no access to Filesystem.");
+            return null;
+            }
+        return f.apply( patchRequire, args );
+        });
+    require.cache = _require.cache;
+    require.extensions = _require.extensions; 
+    require.stubs = _require.stubs;
+    require.patched = _require.patched;
+})();
