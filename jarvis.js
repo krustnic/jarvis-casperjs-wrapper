@@ -33,7 +33,7 @@ var Jarvis = new (function() {
     this.SCREENSHOT_EXT    = "png";   
     
     this._screenShotCount  = 0;
-    this._currentCommandId  = 0;
+    this._currentCommandId = 0;
     
     // Config default values
     // Actual values will be result of merge with file data
@@ -94,6 +94,64 @@ var Jarvis = new (function() {
         });
     }
     
+    /* 
+     * return real value of the sufix
+     */
+    this.getSufix = function(type){
+        if( type == "") {
+            return "";
+        }
+        else if( type == "date") {
+            var currentTime = new Date();
+            var month 		= currentTime.getMonth() + 1;
+            var day 		= currentTime.getDate();
+            var year 		= currentTime.getFullYear();
+            return day + "." + month + "." + year;
+        }
+        else if(type == "unixtime") {
+            return new Date().getTime();
+        }
+        else if(type == "randomString") {
+            return Jarvis.getRandomString(8);
+        }
+        else if(type == "randomInteger") {
+            return Jarvis.getRandomInt(0, 100);
+        }
+        else {
+            return "";
+        }
+    }
+    
+    //return random string of lenght len with letters and numbers
+    this.getRandomString = function(len){
+        if(len == undefined || len < 1){
+            len = 8;
+        }
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for( var i=0; i < len; i++ ){
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text; 
+    }
+    
+    // return random integer between min and max numbers(0 and 100 by default)
+    this.getRandomInt = function( min, max ){
+        if(min < (Number.MAX_VALUE * -1)){
+            min = Number.MAX_VALUE * -1;
+        }
+        if(min == undefined){
+            min = 0;
+        }
+        if(max > Number.MAX_VALUE){
+            max = Number.MAX_VALUE;
+        }
+        if(max == undefined){
+            max = 100;
+        }        
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
     //  add http status into log
     this.addHttpStatusLog = function(resource){
         self.httpStatusLog.push(
@@ -148,10 +206,21 @@ var Jarvis = new (function() {
 })();
 
 /**
+ * Original signature: sendKeys(selector, value, Object options)ж
+ * Rewrite "ыутвЛуны" for using prefix and postfix params
+ **/
+casper.jSendKeys = function(selector, keys, options, prefix, postfix){
+	var prefixText  = Jarvis.getSufix(prefix);
+    var postfixText = Jarvis.getSufix(postfix);
+    var value 		= prefixText + keys + postfixText;
+    return casper.sendKeys(selector, value, options);
+}
+
+
+/**
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
  * Rewrite "capture" for making screenshots to the proper server location
  **/
-
 casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {    
     
     // Default params
@@ -212,6 +281,9 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     return f.apply( casper.test, args );  
 } );
 
+
+
+
 // on load.fail listener, add failed assertation when cant load resource
 casper.on('load.failed', function(msg) {
     var messsge = 'Loading resource failed with status=' + msg.status;
@@ -227,6 +299,9 @@ casper.on('load.failed', function(msg) {
         }
     });
 });
+
+
+
 
 //logging all JavaScript errors on page
 casper.on("page.error", function(msg, trace) {
@@ -276,6 +351,7 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
     casper.log("Sorry. You have no access to Download() function");
     return this;  
 } );
+
 
 /**
  * Disallow user script access to some modules (e.g. "fs")  
