@@ -137,18 +137,15 @@ var Jarvis = new (function() {
     
     // return random integer between min and max numbers(0 and 100 by default)
     this.getRandomInt = function( min, max ){
-        if(min < (Number.MAX_VALUE * -1)){
-            min = Number.MAX_VALUE * -1;
+        if(!parseInt(min)){
+            return "";
         }
-        if(min == undefined){
-            min = 0;
+        if(!parseInt(max)){
+            return "";
         }
-        if(max > Number.MAX_VALUE){
-            max = Number.MAX_VALUE;
+        if(min >= max){
+            return "";
         }
-        if(max == undefined){
-            max = 100;
-        }        
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     
@@ -207,7 +204,7 @@ var Jarvis = new (function() {
 
 /**
  * Original signature: sendKeys(selector, value, Object options)ж
- * Rewrite "ыутвЛуны" for using prefix and postfix params
+ * Rewrite "sendKeys" for using prefix and postfix params
  **/
 casper.jSendKeys = function(selector, keys, options, prefix, postfix){
 	var prefixText  = Jarvis.getSufix(prefix);
