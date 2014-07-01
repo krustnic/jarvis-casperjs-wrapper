@@ -102,11 +102,7 @@ var Jarvis = new (function() {
             return "";
         }
         else if( type == "date") {
-            var currentTime = new Date();
-            var month 		= currentTime.getMonth() + 1;
-            var day 		= currentTime.getDate();
-            var year 		= currentTime.getFullYear();
-            return day + "." + month + "." + year;
+			return Jarvis.getCurrentDate();
         }
         else if(type == "unixtime") {
             return new Date().getTime();
@@ -147,6 +143,20 @@ var Jarvis = new (function() {
             return "";
         }
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    this.getCurrentDate = function(){
+            var currentDate = new Date();
+            var month 		= currentDate.getMonth() + 1;
+            if(month < 10){
+                month = "0" + month;
+            }
+            var day 		= currentDate.getDate();
+            if(day < 10){
+                day = "0" + day;
+            }
+            var year 		= currentDate.getFullYear();
+            return day + "." + month + "." + year;
     }
     
     //  add http status into log
