@@ -256,12 +256,14 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     // Check is screenshot really created
     var isExist = Jarvis.exists( screenshotPath );
     var pageUrl = casper.getCurrentUrl();
+    var title = casper.getTitle();
     
     Jarvis.screenshotsLog.push( {
         commandId  : Jarvis._currentCommandId,
         success    : isExist,
         page       : pageUrl,
         screenName : screenshotName,
+        title	   : title,
         width      : captureParams.width,
         height     : captureParams.height
     } );
