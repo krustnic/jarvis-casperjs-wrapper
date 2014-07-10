@@ -178,6 +178,12 @@ var Jarvis = new (function() {
     
     this.saveLogs = function() {
         var log = self.config;
+        if(self.suiteResultsLog[0].failed == 0 && self.pageLog.length == 0 && self.httpStatusLog.length == 0){
+            for(var i = 0; i < self.screenshotsLog.length - 1; i++){            
+                fs.remove(self.screenshotsLog[i].screenPath);                
+            }
+            self.screenshotsLog.splice(0, self.screenshotsLog.length - 1);
+        }
         log["screenShots"]   = self.screenshotsLog;
         log["suiteResults"]  = self.suiteResultsLog;
         log["casperLog"]     = self.casperLog;
@@ -266,12 +272,13 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
         success    : isExist,
         page       : pageUrl,
         screenName : screenshotName,
+        screenPath : screenshotPath,
         title	   : title,
         width      : captureParams.width,
         height     : captureParams.height
     } );
     
-    Jarvis.saveLogs();
+//     Jarvis.saveLogs();
     
     return r;
         
