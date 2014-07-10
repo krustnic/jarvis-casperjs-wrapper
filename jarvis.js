@@ -228,8 +228,11 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
  * Rewrite "capture" for making screenshots to the proper server location
  **/
-casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {    
-    
+casper.capture = Jarvis.wrap( casper.capture, function( f, args ) { 
+    //highlighting focused element 
+    casper.evaluate(function(){
+        document.activeElement.style.backgroundColor = "Green";
+    });
     // Default params
     var captureParams = {
         top   : 0,
@@ -344,24 +347,41 @@ casper.on('step.start', function() {
 /**
  * Capturing screenshot after each casper.then() function
  **/
-casper.then = Jarvis.wrap( casper.then, function( f, args ) {      
+casper.then = Jarvis.wrap( casper.then, function( f, args ) {   
     var r = f.apply( casper, args );
     var captArgs = [function() {
-        this.capture("");
+        casper.capture("");
     }];
     f.apply(casper, captArgs);
 } );
 
 /**
+ * Capturing final screenshot
+ **/
+casper.run = Jarvis.wrap( casper.run, function( f, args ) {  
+    var userFinalFunction;
+    if(args.length > 0){
+        userFinalFunction = args[0];
+    }  
+    var jarvisFinalFunction = function(){
+        casper.capture("");
+        if(typeof userFinalFunction === 'function'){
+            userFinalFunction(); 
+        }
+        casper.exit();
+    }
+    args[0] = jarvisFinalFunction;
+    var r = f.apply( casper, args );
+} );
+
+/**
  * Saving jarjis Log into JSON file
  **/
-casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {      
-    var r = f.apply( casper.test, args );  
-    
+casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {    
+    var r = f.apply( casper.test, args ); 
     Jarvis.suiteResultsLog         = casper.test.suiteResults;
     Jarvis.suiteResultsLog["time"] = casper.test.suiteResults.calculateDuration();
     Jarvis.casperLog               = casper.result.log;
-    
     Jarvis.saveLogs();
 } );
 
