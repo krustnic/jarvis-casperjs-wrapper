@@ -340,6 +340,18 @@ casper.on('step.start', function() {
     Jarvis._currentCommandId = Jarvis._currentCommandId + 1;
 });
 
+
+/**
+ * Capturing screenshot after each casper.then() function
+ **/
+casper.then = Jarvis.wrap( casper.then, function( f, args ) {      
+    var r = f.apply( casper, args );
+    var captArgs = [function() {
+        this.capture("");
+    }];
+    f.apply(casper, captArgs);
+} );
+
 /**
  * Saving jarjis Log into JSON file
  **/
