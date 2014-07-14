@@ -34,11 +34,13 @@ var Jarvis = new (function() {
     
     this._screenShotCount  = 0;
     this._currentCommandId = 0;
+    this._pageLoaded       = false;
     
     // Config default values
     // Actual values will be result of merge with file data
     this.config = {
-        "RUNNER_ID" : "1"
+        "RUNNER_ID"    : "1",
+        "STEP_CAPTURE" : true         //if true - capture screenshot after each step  
     };
     
     this.loadConfigFile = function() {
@@ -178,6 +180,12 @@ var Jarvis = new (function() {
     
     this.saveLogs = function() {
         var log = self.config;
+        if(self.suiteResultsLog[0].failed == 0 && self.pageLog.length == 0 && self.httpStatusLog.length == 0){
+            for(var i = 0; i < self.screenshotsLog.length - 1; i++){            
+                fs.remove(self.screenshotsLog[i].screenPath);                
+            }
+            self.screenshotsLog.splice(0, self.screenshotsLog.length - 1);
+        }
         log["screenShots"]   = self.screenshotsLog;
         log["suiteResults"]  = self.suiteResultsLog;
         log["casperLog"]     = self.casperLog;
@@ -228,8 +236,7 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
  * Rewrite "capture" for making screenshots to the proper server location
  **/
-casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {    
-    
+casper.capture = Jarvis.wrap( casper.capture, function( f, args ) { 
     // Default params
     var captureParams = {
         top   : 0,
@@ -256,22 +263,21 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     // Check is screenshot really created
     var isExist = Jarvis.exists( screenshotPath );
     var pageUrl = casper.getCurrentUrl();
+    var title = casper.getTitle();
     
     Jarvis.screenshotsLog.push( {
         commandId  : Jarvis._currentCommandId,
         success    : isExist,
         page       : pageUrl,
         screenName : screenshotName,
+        screenPath : screenshotPath,
+        title	   : title,
         width      : captureParams.width,
         height     : captureParams.height
-    } );
-    
-    Jarvis.saveLogs();
-    
+    } );  
     return r;
         
 });
-
 
 
 
@@ -338,16 +344,31 @@ casper.on('step.start', function() {
     Jarvis._currentCommandId = Jarvis._currentCommandId + 1;
 });
 
+// capteure screenshot after each step
+casper.on('step.complete', function() {
+    if(Jarvis.config.STEP_CAPTURE == true && this._pageLoaded == true){
+    	casper.capture("");   
+    }
+});
+
+//set _pageLoaded flag.
+casper.on('load.finished', function() {
+    this._pageLoaded = true;
+});
+
+//set _pageLoaded flag.
+casper.on('load.started', function() {
+    this._pageLoaded = false;
+});
+
 /**
  * Saving jarjis Log into JSON file
  **/
-casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {      
-    var r = f.apply( casper.test, args );  
-    
+casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {    
+    var r = f.apply( casper.test, args ); 
     Jarvis.suiteResultsLog         = casper.test.suiteResults;
     Jarvis.suiteResultsLog["time"] = casper.test.suiteResults.calculateDuration();
     Jarvis.casperLog               = casper.result.log;
-    
     Jarvis.saveLogs();
 } );
 
