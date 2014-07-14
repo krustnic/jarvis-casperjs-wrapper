@@ -1,4 +1,5 @@
 {
-    "BASE_DIR"  : "result/0",
-    "RUNNER_ID" : "0"
+    "BASE_DIR"  	: "result/0",
+    "RUNNER_ID" 	: "0",
+    "REWRITE_THEN"	: false
 }
