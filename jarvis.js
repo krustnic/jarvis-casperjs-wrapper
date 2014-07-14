@@ -180,18 +180,30 @@ var Jarvis = new (function() {
     
     this.saveLogs = function() {
         var log = self.config;
-        if(self.suiteResultsLog[0].failed == 0 && self.pageLog.length == 0 && self.httpStatusLog.length == 0){
+        var isSuccess = true;
+        for(var suiteIndex in self.suiteResultsLog){
+            var suite = self.suiteResultsLog[suiteIndex];
+            if(suite.failed != 0 ){
+                isSuccess = false;
+            }
+        }
+        if(self.pageLog.length != 0 || self.httpStatusLog.length != 0){
+			isSuccess = false;
+        }
+        //if success - delete (n-1) screenshots
+        if(isSuccess){
             for(var i = 0; i < self.screenshotsLog.length - 1; i++){            
                 fs.remove(self.screenshotsLog[i].screenPath);                
             }
             self.screenshotsLog.splice(0, self.screenshotsLog.length - 1);
-        }
+        }    
+        
         log["screenShots"]   = self.screenshotsLog;
         log["suiteResults"]  = self.suiteResultsLog;
         log["casperLog"]     = self.casperLog;
         log["pageLog"]       = self.pageLog;
         log["httpStatusLog"] = self.httpStatusLog;
-        
+       
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
     
@@ -275,10 +287,8 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
         width      : captureParams.width,
         height     : captureParams.height
     } );  
-    return r;
-        
+    return r;      
 });
-
 
 
 /**
@@ -312,8 +322,6 @@ casper.on('load.failed', function(msg) {
         }
     });
 });
-
-
 
 
 //logging all JavaScript errors on page
@@ -384,8 +392,6 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
 /**
  * Disallow user script access to some modules (e.g. "fs")  
  **/
-
-
 (function() {
     var _require = require;
     require = Jarvis.wrap( require, function( f, args ) {
