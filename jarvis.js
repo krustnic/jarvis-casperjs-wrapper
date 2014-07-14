@@ -364,13 +364,13 @@ casper.on('load.started', function() {
 /**
  * Saving jarjis Log into JSON file
  **/
-casper.test.done = Jarvis.wrap( casper.test.done, function( f, args ) {    
-    var r = f.apply( casper.test, args ); 
+casper.test.on('test.done', function() {
     Jarvis.suiteResultsLog         = casper.test.suiteResults;
     Jarvis.suiteResultsLog["time"] = casper.test.suiteResults.calculateDuration();
     Jarvis.casperLog               = casper.result.log;
     Jarvis.saveLogs();
-} );
+});
+
 
 /**
  * Disallow user to use download() function  
