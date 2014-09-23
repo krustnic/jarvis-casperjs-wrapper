@@ -20,8 +20,8 @@ var Jarvis = new (function() {
     this.screenshotsLog  = [];
     this.suiteResultsLog = [];
     this.casperLog       = [];
-    this.pageLog         = [];
-    this.httpStatusLog   = [];
+//     this.pageLog         = [];
+//     this.httpStatusLog   = [];
     
     
     
@@ -162,21 +162,21 @@ var Jarvis = new (function() {
     }
     
     //  add http status into log
-    this.addHttpStatusLog = function(resource){
-        self.httpStatusLog.push(
-            {
-                commandId   : Jarvis._currentCommandId,
-                status      : resource.status,
-                redirectURL : resource.redirectURL,
-                stage       : resource.end,
-                statusText  : resource.statusText,
-                time        : resource.time,
-                data        : resource.data,
-                page        : resource.url,
-                contentType : resource.contentType,
-                headers     : resource.headers
-            })
-    }
+//     this.addHttpStatusLog = function(resource){
+//         self.httpStatusLog.push(
+//             {
+//                 commandId   : Jarvis._currentCommandId,
+//                 status      : resource.status,
+//                 redirectURL : resource.redirectURL,
+//                 stage       : resource.end,
+//                 statusText  : resource.statusText,
+//                 time        : resource.time,
+//                 data        : resource.data,
+//                 page        : resource.url,
+//                 contentType : resource.contentType,
+//                 headers     : resource.headers
+//             })
+//     }
     
     this.saveLogs = function() {
         var log = self.config;
@@ -187,9 +187,11 @@ var Jarvis = new (function() {
                 isSuccess = false;
             }
         }
-        if(self.pageLog.length != 0 || self.httpStatusLog.length != 0){
-			isSuccess = false;
-        }
+//         if(self.pageLog.length != 0 
+//            || self.httpStatusLog.length != 0
+//           ){
+// 			isSuccess = false;
+//         }
         //if success - delete (n-1) screenshots
         if(isSuccess){
             for(var i = 0; i < self.screenshotsLog.length - 1; i++){            
@@ -201,8 +203,8 @@ var Jarvis = new (function() {
         log["screenShots"]   = self.screenshotsLog;
         log["suiteResults"]  = self.suiteResultsLog;
         log["casperLog"]     = self.casperLog;
-        log["pageLog"]       = self.pageLog;
-        log["httpStatusLog"] = self.httpStatusLog;
+//         log["pageLog"]       = self.pageLog;
+//         log["httpStatusLog"] = self.httpStatusLog;
        
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -326,25 +328,36 @@ casper.on('load.failed', function(msg) {
 
 //logging all JavaScript errors on page
 casper.on("page.error", function(msg, trace) {
-    Jarvis.pageLog.push( {
-        commandId   : Jarvis._currentCommandId,
-        page        : casper.getCurrentUrl(),
-        message     : msg,
-        trace       : trace
-    } );
+    casper.test.assert(false, 'Page have no errors'
+                  , {
+        type:    "page error",
+        standard: "Page have no errors",
+        page_error_msg: msg,
+        trace: trace
+    }
+                 );
+//     Jarvis.pageLog.push( {
+//         commandId   : Jarvis._currentCommandId,
+//         page        : casper.getCurrentUrl(),
+//         message     : msg,
+//         trace       : trace
+//     } );
 });
 
 //logging 401 http status
 casper.on('http.status.401', function(resource) {
-    Jarvis.addHttpStatusLog(resource);
+    casper.assertHttpStatus(200, "http satatus is 200");
+//     Jarvis.addHttpStatusLog(resource);
 })
 //logging 404 http status
 casper.on('http.status.404', function(resource) {
-    Jarvis.addHttpStatusLog(resource);
+    casper.assertHttpStatus(200, "http satatus is 200");
+//     Jarvis.addHttpStatusLog(resource);
 })
 //logging 500 http status
 casper.on('http.status.500', function(resource) {
-    Jarvis.addHttpStatusLog(resource);
+    casper.assertHttpStatus(200, "http satatus is 200");
+//     Jarvis.addHttpStatusLog(resource);
 })
 
 // on step.start listener, increment commandId counter
