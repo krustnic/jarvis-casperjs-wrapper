@@ -346,17 +346,17 @@ casper.on("page.error", function(msg, trace) {
 
 //logging 401 http status
 casper.on('http.status.401', function(resource) {
-    casper.assertHttpStatus(200, "http satatus is 200");
+    casper.test.assertHttpStatus(200, "http satatus is 200");
 //     Jarvis.addHttpStatusLog(resource);
 })
 //logging 404 http status
 casper.on('http.status.404', function(resource) {
-    casper.assertHttpStatus(200, "http satatus is 200");
+    casper.test.assertHttpStatus(200, "http satatus is 200");
 //     Jarvis.addHttpStatusLog(resource);
 })
 //logging 500 http status
 casper.on('http.status.500', function(resource) {
-    casper.assertHttpStatus(200, "http satatus is 200");
+    casper.test.assertHttpStatus(200, "http satatus is 200");
 //     Jarvis.addHttpStatusLog(resource);
 })
 
