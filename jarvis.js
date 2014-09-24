@@ -19,11 +19,7 @@ var Jarvis = new (function() {
     // Log's parts
     this.screenshotsLog  = [];
     this.suiteResultsLog = [];
-    this.casperLog       = [];
-//     this.pageLog         = [];
-//     this.httpStatusLog   = [];
-    
-    
+    this.casperLog       = [];  
     
     this.BASE_DIR         = casper.cli.raw.get("base-dir") || ".";
     this.USER_CONFIG_FILE = casper.cli.raw.get("config-file");
@@ -161,22 +157,6 @@ var Jarvis = new (function() {
             return day + "." + month + "." + year;
     }
     
-    //  add http status into log
-//     this.addHttpStatusLog = function(resource){
-//         self.httpStatusLog.push(
-//             {
-//                 commandId   : Jarvis._currentCommandId,
-//                 status      : resource.status,
-//                 redirectURL : resource.redirectURL,
-//                 stage       : resource.end,
-//                 statusText  : resource.statusText,
-//                 time        : resource.time,
-//                 data        : resource.data,
-//                 page        : resource.url,
-//                 contentType : resource.contentType,
-//                 headers     : resource.headers
-//             })
-//     }
     
     this.saveLogs = function() {
         var log = self.config;
@@ -187,12 +167,6 @@ var Jarvis = new (function() {
                 isSuccess = false;
             }
         }
-//         if(self.pageLog.length != 0 
-//            || self.httpStatusLog.length != 0
-//           ){
-// 			isSuccess = false;
-//         }
-        //if success - delete (n-1) screenshots
         if(isSuccess){
             for(var i = 0; i < self.screenshotsLog.length - 1; i++){            
                 fs.remove(self.screenshotsLog[i].screenPath);                
@@ -203,8 +177,6 @@ var Jarvis = new (function() {
         log["screenShots"]   = self.screenshotsLog;
         log["suiteResults"]  = self.suiteResultsLog;
         log["casperLog"]     = self.casperLog;
-//         log["pageLog"]       = self.pageLog;
-//         log["httpStatusLog"] = self.httpStatusLog;
        
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
@@ -258,7 +230,7 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
         width : Jarvis.getScreenResolution().width,
         height: Jarvis.getScreenResolution().height
     };
-    
+    var is_assert = false;
     // Merge default params with user-defined, if it exist
     if ( typeof args[1] == "object" ) {
         for( var key in args[1] ) {
@@ -272,7 +244,14 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     
     var screenshotName = Jarvis.getNewScreenshotName();
     var screenshotPath = Jarvis.getPath( screenshotName );
-    var r = f.call( casper, screenshotPath, captureParams );         
+    var r = f.call( casper, screenshotPath, captureParams );    
+    
+    // 
+    if (args[3] == "is_assert" && typeof args[4] == "object" ) {
+        is_assert = true;
+        var err = args[4];
+        err.screenName = screenshotName;
+    }
     
     // Check is screenshot really created
     var isExist = Jarvis.exists( screenshotPath );
@@ -287,7 +266,8 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
         screenPath : screenshotPath,
         title	   : title,
         width      : captureParams.width,
-        height     : captureParams.height
+        height     : captureParams.height,
+        is_assert  : is_assert
     } );  
     return r;      
 });
@@ -302,6 +282,7 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     if(!err.url){
         err.url = casper.getCurrentUrl();
     }
+    casper.capture("", undefined, undefined, "is_assert", err);
     err.commandId = Jarvis._currentCommandId;  
     return f.apply( casper.test, args );  
 } );
@@ -336,28 +317,21 @@ casper.on("page.error", function(msg, trace) {
         trace: trace
     }
                  );
-//     Jarvis.pageLog.push( {
-//         commandId   : Jarvis._currentCommandId,
-//         page        : casper.getCurrentUrl(),
-//         message     : msg,
-//         trace       : trace
-//     } );
+
 });
+
 
 //logging 401 http status
 casper.on('http.status.401', function(resource) {
     casper.test.assertHttpStatus(200, "http satatus is 200");
-//     Jarvis.addHttpStatusLog(resource);
 })
 //logging 404 http status
 casper.on('http.status.404', function(resource) {
     casper.test.assertHttpStatus(200, "http satatus is 200");
-//     Jarvis.addHttpStatusLog(resource);
 })
 //logging 500 http status
 casper.on('http.status.500', function(resource) {
     casper.test.assertHttpStatus(200, "http satatus is 200");
-//     Jarvis.addHttpStatusLog(resource);
 })
 
 // on step.start listener, increment commandId counter
