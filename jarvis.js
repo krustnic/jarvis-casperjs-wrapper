@@ -35,8 +35,9 @@ var Jarvis = new (function() {
     // Config default values
     // Actual values will be result of merge with file data
     this.config = {
-        "RUNNER_ID"    : "1",
-        "STEP_CAPTURE" : true         //if true - capture screenshot after each step  
+        "RUNNER_ID"    : "1"
+//         "STEP_CAPTURE" : true,         //if true - capture screenshot after each step  
+//         "IN_FRAME"     : false         //if true - do not capture autamaticly
     };
     
     this.loadConfigFile = function() {
@@ -287,36 +288,43 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     return f.apply( casper.test, args );  
 } );
 
-
-
+/**
+ * add final assert "All test are passed"
+ **/
+casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
+    casper.then(function() {
+        this.test.assert(casper.test.currentSuite.failed == 0, "All test are passed");
+    });
+    return f.apply( casper, args );  
+} );
 
 // on load.fail listener, add failed assertation when cant load resource
 casper.on('load.failed', function(msg) {
     var messsge = 'Loading resource failed with status=' + msg.status;
     casper.test.processAssertionResult(    
         {
-        success: false,
-        type: "uncaughtError",
-        file: casper.test.currentTestFile,
-        message: messsge,
-        url:  msg.url, 
-        values: {
-            error: new CasperError( messsge),
-        }
-    });
+            success: false,
+            type: "uncaughtError",
+            file: casper.test.currentTestFile,
+            message: messsge,
+            url:  msg.url, 
+            values: {
+                error: new CasperError( messsge),
+            }
+        });
 });
 
 
 //logging all JavaScript errors on page
 casper.on("page.error", function(msg, trace) {
     casper.test.assert(false, 'Page have no errors'
-                  , {
+                       , {
         type:    "page error",
         standard: "Page have no errors",
         page_error_msg: msg,
         trace: trace
     }
-                 );
+                      );
 
 });
 
@@ -335,15 +343,8 @@ casper.on('http.status.500', function(resource) {
 })
 
 // on step.start listener, increment commandId counter
-casper.on('step.start', function() {
+casper.on('step.start', function(step) {
     Jarvis._currentCommandId = Jarvis._currentCommandId + 1;
-});
-
-// capteure screenshot after each step
-casper.on('step.complete', function() {
-    if(Jarvis.config.STEP_CAPTURE == true && this._pageLoaded == true){
-    	casper.capture("");   
-    }
 });
 
 //set _pageLoaded flag.
@@ -355,6 +356,7 @@ casper.on('load.finished', function() {
 casper.on('load.started', function() {
     this._pageLoaded = false;
 });
+
 
 /**
  * Saving jarjis Log into JSON file
