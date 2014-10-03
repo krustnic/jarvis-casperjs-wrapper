@@ -289,11 +289,11 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
 } );
 
 /**
- * add final assert "All test are passed"
+ * add final assert "All tests are passed"
  **/
 casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
     casper.then(function() {
-        this.test.assert(casper.test.currentSuite.failed == 0, "All test are passed");
+        this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
     });
     return f.apply( casper, args );  
 } );
