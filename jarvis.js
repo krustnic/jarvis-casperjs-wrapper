@@ -32,6 +32,9 @@ var Jarvis = new (function() {
     this._currentCommandId = 0;
     this._pageLoaded       = false;
     
+    this._currentAnnotationType   = undefined;
+    this._currentAnnotationTestId = undefined;
+    
     // Config default values
     // Actual values will be result of merge with file data
     this.config = {
@@ -288,13 +291,20 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     return f.apply( casper.test, args );  
 } );
 
+casper.test.done = Jarvis.wrap( casper.test.done  , function( f, args ) {  
+    casper.test.currentSuite.annotationType   = casper._currentAnnotationType;
+    casper.test.currentSuite.annotationTestId = casper._currentAnnotationTestId;
+    casper.echo(JSON.stringify( casper.test.currentSuite));
+    return f.apply( casper.test, args );  
+} );
+
 /**
- * add final assert "All tests are passed"
+ * add final assert "All tests are passed", also add annotation description to tests 
  **/
 casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
     casper.then(function() {
         this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
-    });
+    });      
     return f.apply( casper, args );  
 } );
 
