@@ -32,8 +32,6 @@ var Jarvis = new (function() {
     this._currentCommandId = 0;
     this._pageLoaded       = false;
     
-    this._currentAnnotationType   = undefined;
-    this._currentAnnotationTestId = undefined;
     
     // Config default values
     // Actual values will be result of merge with file data
