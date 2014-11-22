@@ -326,7 +326,7 @@ casper.on('load.failed', function(msg) {
 casper.on("page.error", function(msg, trace) {
     casper.test.assert(false, 'Page have no errors'
                        , {
-        type:    "page error",
+        type:    "pageError",
         standard: "Page have no errors",
         page_error_msg: msg,
         trace: trace
