@@ -292,7 +292,6 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
 casper.test.done = Jarvis.wrap( casper.test.done  , function( f, args ) {  
     casper.test.currentSuite.annotationType   = casper._currentAnnotationType;
     casper.test.currentSuite.annotationTestId = casper._currentAnnotationTestId;
-    casper.echo(JSON.stringify( casper.test.currentSuite));
     return f.apply( casper.test, args );  
 } );
 
@@ -339,15 +338,22 @@ casper.on("page.error", function(msg, trace) {
 
 //logging 401 http status
 casper.on('http.status.401', function(resource) {
-    casper.test.assertHttpStatus(200, "http satatus is 200");
+    casper.then(function () {
+        casper.test.assertHttpStatus(200, "http satatus is 200");
+    });
 })
 //logging 404 http status
 casper.on('http.status.404', function(resource) {
-    casper.test.assertHttpStatus(200, "http satatus is 200");
+    casper.then(function () {
+        casper.test.assertHttpStatus(200, "http satatus is 200");
+    });
+
 })
 //logging 500 http status
 casper.on('http.status.500', function(resource) {
-    casper.test.assertHttpStatus(200, "http satatus is 200");
+    casper.then(function () {
+        casper.test.assertHttpStatus(200, "http satatus is 200");
+    });
 })
 
 // on step.start listener, increment commandId counter
@@ -404,5 +410,5 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
     require.cache = _require.cache;
     require.extensions = _require.extensions; 
     require.stubs = _require.stubs;
-    require.patched = _require.patched;
+    require.patched = _require.patched;    
 })();
