@@ -292,7 +292,6 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
 casper.test.done = Jarvis.wrap( casper.test.done  , function( f, args ) {  
     casper.test.currentSuite.annotationType   = casper._currentAnnotationType;
     casper.test.currentSuite.annotationTestId = casper._currentAnnotationTestId;
-//     casper.echo(JSON.stringify( casper.test.currentSuite));
     return f.apply( casper.test, args );  
 } );
 
@@ -411,7 +410,5 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
     require.cache = _require.cache;
     require.extensions = _require.extensions; 
     require.stubs = _require.stubs;
-    require.patched = _require.patched;
-    require.utils = _require.utils;
-    
+    require.patched = _require.patched;    
 })();
