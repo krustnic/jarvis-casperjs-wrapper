@@ -342,12 +342,12 @@ casper.test.assertResourceExist = function assertResourceExists(test, message) {
 /**
  * add final assert "All tests are passed", also add annotation description to tests 
  **/
-casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
-    casper.then(function() {
-        this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
-    });      
-    return f.apply( casper, args );  
-} );
+// casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
+//     casper.then(function() {
+//         this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
+//     });      
+//     return f.apply( casper, args );  
+// } );
 
 // on load.fail listener, add failed assertation when cant load resource
 casper.on('load.failed', function(msg) {
