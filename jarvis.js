@@ -295,6 +295,50 @@ casper.test.done = Jarvis.wrap( casper.test.done  , function( f, args ) {
     return f.apply( casper.test, args );  
 } );
 
+//owerwrite casper assertEval fuction to return evaluated function as string in values
+casper.test.assertEval =
+casper.test.assertEvaluate = function assertEval(fn, message, params) {
+    "use strict";
+    return this.assert(this.casper.evaluate(fn, params), message, {
+        type: "assertEval",
+        standard: "Evaluated function returns true",
+        values: {
+            fn: String(fn),
+            params: params
+        }
+    });
+};
+
+//owerwrite casper assertEvalEquals fuction to return evaluated function as string in values
+casper.test.assertEvalEquals =
+casper.test.assertEvalEqual = function assertEvalEquals(fn, expected, message, params) {
+    "use strict";
+    var subject = this.casper.evaluate(fn, params);
+    return this.assert(utils.equals(subject, expected), message, {
+        type: "assertEvalEquals",
+        standard: "Evaluated function returns the expected value",
+        values: {
+            fn: String(fn),
+            params: params,
+            subject:  subject,
+            expected: expected
+        }
+    });
+};
+
+//owerwrite casper assertResourceExists fuction to return evaluated function as string in values
+casper.test.assertResourceExists =
+casper.test.assertResourceExist = function assertResourceExists(test, message) {
+    "use strict";
+    return this.assert(this.casper.resourceExists(test), message, {
+        type: "assertResourceExists",
+        standard: "Confirm page has resource",
+        values: {
+            test: String(test)
+        }
+    });
+};
+
 /**
  * add final assert "All tests are passed", also add annotation description to tests 
  **/
@@ -332,7 +376,6 @@ casper.on("page.error", function(msg, trace) {
         trace: trace
     }
                       );
-
 });
 
 
