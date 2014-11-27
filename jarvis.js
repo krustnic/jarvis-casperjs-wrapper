@@ -339,6 +339,23 @@ casper.test.assertResourceExist = function assertResourceExists(test, message) {
     });
 };
 
+//new function to strictly compare text within selector
+casper.test.assertSelectorTextEquals =
+casper.test.assertSelectorTextEqual = function assertSelectorTextEquals(selector, text, message) {
+    "use strict";
+    var got = this.casper.fetchText(selector);
+    var textFound = got === text;
+    return this.assert(textFound, message, {
+        type: "assertSelectorTextEquals",
+        standard: f('Find "%s" within the selector "%s"', text, selector),
+        values: {
+            selector: selector,
+            text: text,
+            actualContent: got
+        }
+    });
+};
+
 /**
  * add final assert "All tests are passed", also add annotation description to tests 
  **/
