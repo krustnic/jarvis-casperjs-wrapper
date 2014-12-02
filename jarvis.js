@@ -31,6 +31,9 @@ var Jarvis = new (function() {
     this._screenShotCount  = 0;
     this._currentCommandId = 0;
     this._pageLoaded       = false;
+    this._isPageError      = false;
+    casper.options.exitOnError = false;
+    
     
     
     // Config default values
@@ -79,18 +82,23 @@ var Jarvis = new (function() {
     this.getScreenResolution = function() {
         return casper.evaluate(function() {
             var D = document;
+            var height = Math.max(
+                D.body.scrollHeight, D.documentElement.scrollHeight,
+                D.body.offsetHeight, D.documentElement.offsetHeight,
+                D.body.clientHeight, D.documentElement.clientHeight
+            ) || 0;
+            var width = Math.max(
+                D.body.scrollWidth, D.documentElement.scrollWidth,
+                D.body.offsetWidth, D.documentElement.offsetWidth,
+                D.body.clientWidth, D.documentElement.clientWidth
+            ) || 0; 
             return screenResolution = {
-                height: Math.max(
-                    D.body.scrollHeight, D.documentElement.scrollHeight,
-                    D.body.offsetHeight, D.documentElement.offsetHeight,
-                    D.body.clientHeight, D.documentElement.clientHeight
-                ),
-                width: Math.max(
-                    D.body.scrollWidth, D.documentElement.scrollWidth,
-                    D.body.offsetWidth, D.documentElement.offsetWidth,
-                    D.body.clientWidth, D.documentElement.clientWidth
-                )
-            };
+                height: height,
+                width: width
+            }
+
+
+
         });
     }
     
@@ -226,11 +234,12 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
  **/
 casper.capture = Jarvis.wrap( casper.capture, function( f, args ) { 
     // Default params
+    var screenResolution = Jarvis.getScreenResolution();
     var captureParams = {
         top   : 0,
         left  : 0,
-        width : Jarvis.getScreenResolution().width,
-        height: Jarvis.getScreenResolution().height
+        width : screenResolution.width,
+        height: screenResolution.height
     };
     var is_assert = false;
     // Merge default params with user-defined, if it exist
@@ -248,7 +257,6 @@ casper.capture = Jarvis.wrap( casper.capture, function( f, args ) {
     var screenshotPath = Jarvis.getPath( screenshotName );
     var r = f.call( casper, screenshotPath, captureParams );    
     
-    // 
     if (args[3] == "is_assert" && typeof args[4] == "object" ) {
         is_assert = true;
         var err = args[4];
@@ -284,7 +292,12 @@ casper.test.processAssertionResult = Jarvis.wrap( casper.test.processAssertionRe
     if(!err.url){
         err.url = casper.getCurrentUrl();
     }
-    casper.capture("", undefined, undefined, "is_assert", err);
+    try{
+        casper.capture("", undefined, undefined, "is_assert", err);
+    }
+    catch(e){
+        casper.log(e.message);
+    }
     err.commandId = Jarvis._currentCommandId;  
     return f.apply( casper.test, args );  
 } );
@@ -384,17 +397,37 @@ casper.on('load.failed', function(msg) {
         });
 });
 
+casper.options.onStepComplete = function(){
+        casper._isPageError = false;
+}
+
 
 //logging all JavaScript errors on page
 casper.on("page.error", function(msg, trace) {
-    casper.test.assert(false, 'Page have no errors'
-                       , {
-        type:    "pageError",
-        standard: "Page have no errors",
-        page_error_msg: msg,
-        trace: trace
+
+    if(!this._isPageError){
+        this._isPageError = true;
+            try{
+                casper.test.processAssertionResult(
+                     {
+                         success: false,
+                         file: casper.test.currentTestFile, 
+                         type:    "pageError",
+                         message: msg,
+                         standard: "Page have no errors",
+                         page_error_msg: msg,
+                         trace: trace,
+                         values: {
+                             error: msg,
+                             trace: trace
+                         }
+                }
+                                  );
+            }
+            catch(e){
+                casper.log(e.message);
+            }
     }
-                      );
 });
 
 
