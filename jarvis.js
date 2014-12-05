@@ -356,7 +356,7 @@ casper.test.assertResourceExist = function assertResourceExists(test, message) {
 casper.test.assertSelectorTextEquals =
 casper.test.assertSelectorTextEqual = function assertSelectorTextEquals(selector, text, message) {
     "use strict";
-    var got = this.casper.fetchText(selector);
+    var got = Jarvis.getSelectorText(selector);
     var textFound = got === text;
     return this.assert(textFound, message, {
         type: "assertSelectorTextEquals",
@@ -368,6 +368,36 @@ casper.test.assertSelectorTextEqual = function assertSelectorTextEquals(selector
         }
     });
 };
+
+
+casper.test.assertSelectorHasText =
+casper.test.assertSelectorContains = function assertSelectorHasText(selector, text, message) {
+    "use strict";
+    var got = Jarvis.getSelectorText(selector);
+    var textFound = got.indexOf(text) !== -1;
+    return this.assert(textFound, message, {
+        type: "assertSelectorHasText",
+        standard: f('Find "%s" within the selector "%s"', text, selector),
+        values: {
+            selector: selector,
+            text: text,
+            actualContent: got
+        }
+    });
+};
+
+Jarvis.getSelectorText = function getSelectorText(selector){
+    var selectorText =  casper.evaluate(function(selector){
+        var element = document.querySelector(selector);
+        if (element == null) return null;
+        if (element.tagName == "INPUT")return element.value;
+        if (element.tagName == "SELECT") {
+            if (element.options[element.selectedIndex] == undefined) return "";
+            return element.options[(element.selectedIndex)].innerHTML;
+        }
+    },selector);   
+    return selectorText;
+}
 
 /**
  * add final assert "All tests are passed", also add annotation description to tests 
