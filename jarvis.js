@@ -240,6 +240,9 @@ casper.jChange = function(selector, value, prefix, postfix){
             return 1;    
         }
         element.value = value;
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('change', false, true);
+        element.dispatchEvent(evt);
     }, selector, value);
     if(result === 1){
         casper.test.assertExists(selector, "element with selector '" + selector + "' is exists");
@@ -526,6 +529,12 @@ casper.test.on('test.done', function() {
     Jarvis.saveLogs();
 });
 
+/**
+ * translate console.log() into casper.log()
+ **/
+casper.on('remote.message', function(message) {
+    casper.log('remote message caught: ' + message);
+});
 
 /**
  * Disallow user to use download() function  
