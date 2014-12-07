@@ -227,6 +227,41 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
     return casper.sendKeys(selector, value, options);
 }
 
+/**
+ * Original signature: sendKeys(selector, value, Object options)ж
+ * Rewrite "sendKeys" for using prefix and postfix params
+ **/
+casper.jChange = function(selector, value, prefix, postfix){
+    var prefixText  = Jarvis.getSufix(prefix);
+    var postfixText = Jarvis.getSufix(postfix);
+    var value 		= prefixText + value + postfixText;
+    var result = casper.evaluate(function(selector, value){
+        var element = document.querySelector(selector);
+        if (element == null){
+            return 1;    
+        }
+        if (element.tagName == "INPUT"){
+            element.value = value;
+        }
+        if (element.tagName == "SELECT") {
+            for(var i = 0; i < element.options.length; i++){
+                if(element.options[i].value == value){
+                    element.selectedIndex = i;
+                    return 0;
+                }
+            }
+            return 2;
+        }
+    }, selector, value);
+    casper.log(result);
+    if(result === 1){
+        casper.test.assertExists(selector, "element with selector '" + selector + "' is exists");
+    }
+    else if(result === 2){
+        casper.test.assert(false, "cant find element with value "+ value + " whitin '" + selector + "' select-options");
+    }
+}
+
 
 /**
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
