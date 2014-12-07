@@ -228,8 +228,7 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
 }
 
 /**
- * Original signature: sendKeys(selector, value, Object options)ж
- * Rewrite "sendKeys" for using prefix and postfix params
+ * function that fills inputs and selects
  **/
 casper.jChange = function(selector, value, prefix, postfix){
     var prefixText  = Jarvis.getSufix(prefix);
