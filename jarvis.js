@@ -240,25 +240,10 @@ casper.jChange = function(selector, value, prefix, postfix){
         if (element == null){
             return 1;    
         }
-        if (element.tagName == "INPUT"){
-            element.value = value;
-        }
-        if (element.tagName == "SELECT") {
-            for(var i = 0; i < element.options.length; i++){
-                if(element.options[i].value == value){
-                    element.selectedIndex = i;
-                    return 0;
-                }
-            }
-            return 2;
-        }
+        element.value = value;
     }, selector, value);
-    casper.log(result);
     if(result === 1){
         casper.test.assertExists(selector, "element with selector '" + selector + "' is exists");
-    }
-    else if(result === 2){
-        casper.test.assert(false, "cant find element with value "+ value + " whitin '" + selector + "' select-options");
     }
 }
 
