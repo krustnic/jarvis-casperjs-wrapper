@@ -233,19 +233,29 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
 casper.jChange = function(selector, value, prefix, postfix){
     var prefixText  = Jarvis.getSufix(prefix);
     var postfixText = Jarvis.getSufix(postfix);
-    var value 		= prefixText + value + postfixText;
-    var result = casper.evaluate(function(selector, value){
-        var element = document.querySelector(selector);
-        if (element == null){
-            return 1;    
+    var value 		= prefixText + value + postfixText;    
+    
+    var result = casper.evaluate(function _evaluate(selector, value) {
+        var out = {
+            errors: [],
+
+        };
+        try {
+            var field =  __utils__.findOne(selector);
+            if (!field || field.length === 0) {
+                return  'no field matching selector "' + selector + '"';
+            }
+            try {
+                __utils__.setField(field, value);
+            } catch (err) {
+                return err.message;
+            }
+        } catch (exception) {
+            return exception.toString();
         }
-        element.value = value;
-        var evt = document.createEvent('HTMLEvents');
-        evt.initEvent('change', false, true);
-        element.dispatchEvent(evt);
     }, selector, value);
-    if(result === 1){
-        casper.test.assertExists(selector, "element with selector '" + selector + "' is exists");
+    if(result != null){
+        casper.test.assert(false, result);
     }
 }
 
