@@ -241,7 +241,7 @@ casper.jChange = function(selector, value, prefix, postfix){
 
         };
         try {
-            var field =  __utils__.findOne(selector);
+            var field =  __utils__.findAll(selector);
             if (!field || field.length === 0) {
                 return  'no field matching selector "' + selector + '"';
             }
