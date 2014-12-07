@@ -227,6 +227,25 @@ casper.jSendKeys = function(selector, keys, options, prefix, postfix){
     return casper.sendKeys(selector, value, options);
 }
 
+/**
+ * function that fills inputs and selects
+ **/
+casper.jChange = function(selector, value, prefix, postfix){
+    var prefixText  = Jarvis.getSufix(prefix);
+    var postfixText = Jarvis.getSufix(postfix);
+    var value 		= prefixText + value + postfixText;
+    var result = casper.evaluate(function(selector, value){
+        var element = document.querySelector(selector);
+        if (element == null){
+            return 1;    
+        }
+        element.value = value;
+    }, selector, value);
+    if(result === 1){
+        casper.test.assertExists(selector, "element with selector '" + selector + "' is exists");
+    }
+}
+
 
 /**
  * Original signature: capture(String targetFilepath, [Object clipRect, Object imgOptions])
