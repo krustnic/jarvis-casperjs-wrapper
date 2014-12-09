@@ -427,6 +427,7 @@ Jarvis.getSelectorText = function getSelectorText(selector){
             if (element.options[element.selectedIndex] == undefined) return "";
             return element.options[(element.selectedIndex)].innerHTML;
         }
+        return element.innerHTML;
     },selector);   
     return selectorText;
 }
