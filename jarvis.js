@@ -191,6 +191,22 @@ var Jarvis = new (function() {
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
     
+    this.addHttpStatusFail = function(resource){
+        casper.test.processAssertionResult(    
+            {
+                success: false,
+                type: "assertHttpStatus",
+                standard: "HTTP status code is: " + resource.status,
+                status:  "broken",
+                message: "http satatus is 200",
+                values: {
+                    current: resource.status,
+                    expected: 200
+                }
+            }
+        );
+    }
+    
     // Wrapper for "fs" isExists
     this.exists = function( filePath ) {
         return fs.exists( filePath );
@@ -437,9 +453,34 @@ Jarvis.getSelectorText = function getSelectorText(selector){
  **/
 casper.run = Jarvis.wrap( casper.run  , function( f, args ) {  
     if(casper._lastTestId == casper._currentAnnotationTestId){
-            casper.then(function() {
-        this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
-    }); 
+        casper.then(function() {
+            var is_boken = false;
+            this.test.currentSuite.failures.forEach(function(item, i, arr){
+                casper.log(i);
+                if(item.hasOwnProperty('status') && item.status == "broken"){
+                    is_boken = true;
+                }
+            });
+            if(is_boken){
+                casper.test.processAssertionResult(
+                    {
+                        success: false,
+                        type:    "assert",
+                        status:  "broken",
+                        message: "All tests are passed",
+                        standard: "Subject is strictly true",
+                        file: this.currentTestFile,
+                        doThrow: true,
+                        values: {
+                            subject: false
+                        }
+                    }
+                );
+            }
+            else{
+                this.test.assert(casper.test.currentSuite.failed == 0, "All tests are passed");
+            }
+        }); 
     }     
     return f.apply( casper, args );  
 } );
@@ -451,6 +492,7 @@ casper.on('load.failed', function(msg) {
         {
             success: false,
             type: "uncaughtError",
+            status:  "broken",
             file: casper.test.currentTestFile,
             message: messsge,
             url:  msg.url, 
@@ -476,6 +518,7 @@ casper.on("page.error", function(msg, trace) {
                          success: false,
                          file: casper.test.currentTestFile, 
                          type:    "pageError",
+                         status:  "broken",
                          message: msg,
                          standard: "Page have no errors",
                          page_error_msg: msg,
@@ -484,8 +527,8 @@ casper.on("page.error", function(msg, trace) {
                              error: msg,
                              trace: trace
                          }
-                }
-                                  );
+                     }
+                );
             }
             catch(e){
                 casper.log(e.message);
@@ -496,22 +539,15 @@ casper.on("page.error", function(msg, trace) {
 
 //logging 401 http status
 casper.on('http.status.401', function(resource) {
-    casper.then(function () {
-        casper.test.assertHttpStatus(200, "http satatus is 200");
-    });
+    Jarvis.addHttpStatusFail(resource);
 })
 //logging 404 http status
 casper.on('http.status.404', function(resource) {
-    casper.then(function () {
-        casper.test.assertHttpStatus(200, "http satatus is 200");
-    });
-
-})
+    Jarvis.addHttpStatusFail(resource);
+    })
 //logging 500 http status
 casper.on('http.status.500', function(resource) {
-    casper.then(function () {
-        casper.test.assertHttpStatus(200, "http satatus is 200");
-    });
+    Jarvis.addHttpStatusFail(resource);
 })
 
 // on step.start listener, increment commandId counter
@@ -551,8 +587,19 @@ casper.on('remote.message', function(message) {
  * Disallow user to use download() function  
  **/
 casper.download = Jarvis.wrap( casper.download, function( f, args ) {  
-    casper.log("Sorry. You have no access to Download() function");
-    return this;  
+    casper.test.processAssertionResult(
+        {
+            success: false,
+            file: casper.test.currentTestFile, 
+            type:    "downloadError",
+            status:  "broken",
+            message: "Jarvis do not support files download",
+            standard: "Jarvis do not support files download",
+            values: {
+                subject: false
+            }
+        }
+    );
 } );
 
 
