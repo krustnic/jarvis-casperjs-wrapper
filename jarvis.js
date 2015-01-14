@@ -591,7 +591,7 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
         {
             success: false,
             file: casper.test.currentTestFile, 
-            type:    "Download error",
+            type:    "downloadError",
             status:  "broken",
             message: "Jarvis do not support files download",
             standard: "Jarvis do not support files download",
