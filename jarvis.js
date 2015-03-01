@@ -190,7 +190,7 @@ var Jarvis = new (function() {
        
         fs.write( self.getPath( self.RESULT_LOG_FILE ), JSON.stringify( log ) );
     }
-    
+       
     this.addHttpStatusFail = function(resource){
         casper.test.processAssertionResult(    
             {
@@ -601,6 +601,19 @@ casper.download = Jarvis.wrap( casper.download, function( f, args ) {
         }
     );
 } );
+
+//terminate program on parse error
+phantom.onError = function(msg, trace) {
+    var msgStack = ['PHANTOM ERROR: ' + msg];
+    if (trace && trace.length) {
+        msgStack.push('TRACE:');
+        trace.forEach(function(t) {
+            msgStack.push(' -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function + ')' : ''));
+        });
+    }
+    casper.log(msgStack.join('\n'), "error")
+    phantom.exit(1);
+};
 
 
 /**
