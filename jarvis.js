@@ -612,7 +612,7 @@ phantom.onError = function(msg, trace) {
         });
     }
     casper.log(msgStack.join('\n'), "error")
-    phantom.exit(1);
+    phantom.exit(1001);
 };
 
 
