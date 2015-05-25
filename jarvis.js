@@ -448,7 +448,7 @@ Jarvis.getSelectorText = function getSelectorText(selector){
     return selectorText;
 }
 
-Jarvis.assertHttpStatus = function assertHttpStatus(url, status, message){
+casper.assertHttpStatus = function assertHttpStatus(url, status, message){
     var result = casper.evaluate(function(url){
         var http = new XMLHttpRequest();
         http.open('HEAD', url, false);
