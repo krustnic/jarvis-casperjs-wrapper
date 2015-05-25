@@ -448,6 +448,17 @@ Jarvis.getSelectorText = function getSelectorText(selector){
     return selectorText;
 }
 
+Jarvis.assertHttpStatus = function assertHttpStatus(url, status, message){
+    var result = casper.evaluate(function(url){
+        var http = new XMLHttpRequest();
+        http.open('HEAD', url, false);
+        http.send();
+        return http.status;
+    }, url)
+    casper.test.assert(result == (status || 200) , message || "assert http status");
+    return result;
+}
+
 /**
  * add final assert "All tests are passed", also add annotation description to tests 
  **/
