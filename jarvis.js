@@ -434,6 +434,29 @@ casper.test.assertSelectorContains = function assertSelectorHasText(selector, te
     });
 };
 
+casper.test.assertSelectorHasClass = function assertSelectorHasClass(selector, className, message) {
+    "use strict";
+    var result = this.casper.evaluate(function(selector, searchedClassNames){
+        var convertToArray = function(arr){
+            return arr.split(" ").map(Function.prototype.call, String.prototype.trim).filter(function(elem){return elem != ""})
+        }
+        var existClassNames = document.querySelector(selector).className;
+        var existClasses = convertToArray(existClassNames);
+        var serchedClasses = convertToArray(searchedClassNames);    
+        for( var i = 0; i < serchedClasses.length; i++ ){
+            if(existClasses.indexOf(serchedClasses[i]) === -1){
+                return false;
+            }
+        }
+        return true;
+    }, selector, className);
+
+    return this.assert(result == true, message, {
+        type: "assertSelectorHasClass",
+        standard: "Selector has class '" + className + "'",
+    });
+};
+
 Jarvis.getSelectorText = function getSelectorText(selector){
     var selectorText =  casper.evaluate(function(selector){
         var element = document.querySelector(selector);
